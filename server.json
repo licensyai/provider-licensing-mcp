@@ -1,0 +1,15 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.licensy/mcp-server",
+  "description": "Real-time U.S. medical license verification across all 50 states + DC, sourced directly from state medical boards.",
+  "title": "Licensy",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/licensyai/provider-licensing-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://licensy.ai/mcp",
+  "remotes": [
+    { "type": "streamable-http", "url": "https://mcp.licensy.ai/mcp" }
+  ]
+}
