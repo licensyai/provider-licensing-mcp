@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.licensyai/provider-licensing-mcp",
+  "name": "ai.licensy/mcp-server",
   "description": "Real-time U.S. medical license verification across all 50 states + DC.",
   "title": "Licensy",
   "version": "0.1.0",
