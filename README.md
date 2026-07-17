@@ -34,7 +34,7 @@ Licensy MCP is a **remote** server — nothing to install or self-host. Point yo
 
 ### 1. Get your API key
 
-Grab your key from your [Licensy dashboard](https://licensy.ai/dashboard) → **API**. It looks like `ck_…`. The free tier needs no card.
+Grab your key from your [Licensy dashboard](https://licensy.ai/dashboard) → **Settings → API Keys**. It looks like `ck_…`. The free tier needs no card.
 
 ### 2. Add it to your agent
 
@@ -175,7 +175,6 @@ Licensy maintains live verification pipelines against all 51 U.S. medical-board 
 - **Endpoint:** `https://mcp.licensy.ai/mcp`
 - **Discovery card:** `https://mcp.licensy.ai/.well-known/mcp-server`
 - **Docs:** https://licensy.ai/mcp
-- **Status:** https://status.licensy.ai
 - **Support:** support@licensy.ai
 
 *Licensy is a data platform for provider licensing. Verification data is sourced from public state-board records; see [terms](https://licensy.ai/terms).*
