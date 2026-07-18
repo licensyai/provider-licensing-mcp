@@ -94,9 +94,9 @@ Header:    Authorization: Bearer ck_your_key_here
 ## Example prompts
 
 ```text
-Verify this physician — NPI 1234567890 — in Texas.
-Find every active license for NPI 1234567890.
-Retrieve the official source document for that California license.
+Verify this physician.
+Find all active California licenses for NPI 1234567890.
+Retrieve the official source document.
 Check my roster of 40 NPIs for any expired or lapsed licenses.
 Was NPI 1234567890 licensed in New York on 2024-08-12?
 Are there any disciplinary actions on file for NPI 1234567890?
