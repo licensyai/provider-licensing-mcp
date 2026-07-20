@@ -1,47 +1,45 @@
 # Licensy MCP
 
-**Healthcare provider licensing data for AI agents.**
-Verify U.S. medical licenses — status, expiration, and audit-grade source screenshots — from every state board, in real time, from inside any MCP-compatible agent.
+**Healthcare licensing infrastructure — over the Model Context Protocol.**
+
+Nationwide **physician and physician assistant** licensing data, standardized from official public sources across all 50 states + DC, delivered to AI applications through MCP.
 
 <p>
-  <a href="https://mcp.licensy.ai">🌐 mcp.licensy.ai</a> ·
-  <a href="https://licensy.ai/mcp">📖 Docs</a> ·
-  <a href="https://licensy.ai/pricing">💳 Pricing</a> ·
-  <a href="mailto:support@licensy.ai">✉️ Support</a>
+  <a href="https://mcp.licensy.ai">mcp.licensy.ai</a> ·
+  <a href="https://licensy.ai/mcp">Documentation</a> ·
+  <a href="mailto:support@licensy.ai">Contact</a>
 </p>
 
-> Real-time verification across all **50 states + DC**, sourced directly from state medical boards and refreshed every 24 hours. No scraping to maintain, no per-board integrations to build — one tool call.
+> Integrate once instead of building and maintaining separate integrations against dozens of state licensing board websites. Licensy aggregates and normalizes licensing information into a consistent schema, preserves primary-source screenshots where available, and refreshes monitored records daily.
 
 ---
 
-## What you can do
+## What it provides
 
-| | Capability | Tool |
-|---|---|---|
-| 🔎 | **Find a provider's licenses** — every state a physician is licensed in, by NPI | `list_physician_licenses` |
-| ✅ | **Verify a license** — current status, expiration, and an is-active answer | `verify_license` · `get_license_status` |
-| 🧾 | **Retrieve the official source** — signed, audit-grade screenshot of the board page | `get_screenshot_url` |
-| 📚 | **Verify in bulk** — a whole roster in one parallel call | `bulk_verify` |
-| ⚖️ | **Surface disciplinary signals** *(beta)* — suspensions, revocations, surrenders | `search_disciplinary_actions` |
-| 🕰️ | **Point-in-time lookup** *(beta)* — "was this provider licensed on 2024-08-12?" | `get_license_history` |
-| 🔔 | **Monitor changes** *(coming soon)* — webhook on status change, expiry, or new sanction | `subscribe_to_changes` |
+An MCP interface to Licensy's provider-licensing data layer. Tools return a normalized license record — not a per-state HTML page you have to parse.
+
+| Capability | Tool |
+|---|---|
+| List a provider's licenses across states, by NPI | `list_physician_licenses` |
+| Look up a license's current status + expiration | `verify_license` · `get_license_status` |
+| Retrieve the preserved primary-source screenshot for a record | `get_screenshot_url` |
+| Look up many `(NPI, state)` pairs in one call | `bulk_verify` |
+| Surface disciplinary signals from board status text *(beta)* | `search_disciplinary_actions` |
+| Point-in-time status for a past date *(beta)* | `get_license_history` |
+| Monitor a set of providers for changes *(coming soon)* | `subscribe_to_changes` |
+
+**Current coverage:** physician (MD/DO) and physician assistant (PA) licenses, all 50 states + DC. Additional provider categories are on the roadmap, not yet available.
 
 ---
 
-## Quickstart
+## Connect
 
-Licensy MCP is a **remote** server — nothing to install or self-host. Point your agent at `https://mcp.licensy.ai/mcp` and authenticate with your API key.
+Licensy MCP is a **remote** server — nothing to install or host. Point your MCP client at `https://mcp.licensy.ai/mcp` and authenticate with an API key.
 
-### 1. Get your API key
-
-Grab your key from your [Licensy dashboard](https://licensy.ai/dashboard) → **Settings → API Keys**. It looks like `ck_…`. The free tier needs no card.
-
-### 2. Add it to your agent
+**Get access:** request API / MCP access at [licensy.ai/mcp](https://licensy.ai/mcp). Your key comes from the Licensy dashboard → **Settings → API Keys** (starts with `ck_`).
 
 <details open>
 <summary><b>Claude Desktop</b></summary>
-
-Edit `claude_desktop_config.json` (Settings → Developer → Edit Config):
 
 ```json
 {
@@ -54,14 +52,11 @@ Edit `claude_desktop_config.json` (Settings → Developer → Edit Config):
   }
 }
 ```
-
-> The `Authorization:${AUTH}` split (no space) is intentional — it works around `mcp-remote` splitting header args on spaces. Restart Claude Desktop after saving.
+> The `Authorization:${AUTH}` split (no space) works around `mcp-remote` splitting header args on spaces. Restart Claude Desktop after saving.
 </details>
 
 <details>
-<summary><b>Cursor</b></summary>
-
-Add to `~/.cursor/mcp.json`:
+<summary><b>Cursor</b> (<code>~/.cursor/mcp.json</code>)</summary>
 
 ```json
 {
@@ -85,96 +80,57 @@ Header:    Authorization: Bearer ck_your_key_here
 ```
 </details>
 
-### 3. Ask
-
-> "Is Dr. Jane Smith, NPI 1234567890, currently licensed in California?"
-
 ---
 
 ## Example prompts
 
 ```text
-Verify this physician.
-Find all active California licenses for NPI 1234567890.
-Retrieve the official source document.
-Check my roster of 40 NPIs for any expired or lapsed licenses.
-Was NPI 1234567890 licensed in New York on 2024-08-12?
-Are there any disciplinary actions on file for NPI 1234567890?
+List every state where NPI 1234567890 holds a license.
+What is the current status of NPI 1234567890's Texas license?
+Retrieve the source screenshot for that California license.
+Check this roster of NPIs for any expired or lapsed licenses.
+Are there disciplinary signals on file for NPI 1234567890?
 ```
 
 ---
 
 ## Tools
 
-Every tool returns structured JSON with `field` descriptions the model reads directly.
+Every tool returns structured JSON; field descriptions are included so the model can use the output directly.
 
-### `verify_license`
-Single physician + state → `status`, `expiration_date`, `license_active`. Paid tiers add `license_number`, `issuance_date`, `board_source`, `last_refreshed_at`, and a signed `screenshot_url`.
-**Input:** `npi` (preferred) or `license_number`, plus `state` (2-letter or full name).
-
-### `list_physician_licenses`
-One NPI → all licenses on file, one per state, each with status + expiration.
-
-### `get_license_status`
-The minimal-token companion to `verify_license` — returns just the status string. Built for tight agent loops and routing logic.
-
-### `get_screenshot_url` · *paid*
-A signed, 15-minute-TTL URL to the state board page used to verify the license — primary-source evidence for audit, credentialing, and insurance files.
-
-### `bulk_verify` · *paid*
-Up to 100 (Pro) / 1,000 (Enterprise) `(NPI, state)` pairs in a single parallelized call, returned in input order with a status summary.
-
-### `search_disciplinary_actions` · *paid, beta*
-Suspensions, revocations, surrenders, probation, and reprimands surfaced from board status text. (Underlying PDF final-orders are on the roadmap.)
-
-### `get_license_history` · *paid, beta*
-Point-in-time status for a past date. Returns best-available data with a `coverage_start` marker; full append-only history is rolling out.
-
-### `subscribe_to_changes` / `unsubscribe` · *paid, coming soon*
-Register a webhook for `status_change`, `expiration_warning_60d`, and `new_disciplinary_action` events. Registration is live today and your subscriptions persist; **automated delivery is rolling out** — [contact us](mailto:support@licensy.ai) for early access.
-
----
+- **`verify_license`** — one provider + state → normalized `status`, `expiration_date`, `license_active`. Paid access adds `license_number`, `issuance_date`, `board_source`, `last_refreshed_at`, and a signed `screenshot_url`. Input: NPI (preferred) or license number, plus state.
+- **`list_physician_licenses`** — all licenses on file for one NPI, one per state.
+- **`get_license_status`** — minimal status-only response for tight agent loops.
+- **`get_screenshot_url`** *(paid)* — a signed, time-limited URL to the preserved screenshot of the official record, as supporting source context.
+- **`bulk_verify`** *(paid)* — many `(NPI, state)` pairs in one call, returned in input order with a status summary.
+- **`search_disciplinary_actions`** *(paid, beta)* — disciplinary signals surfaced from board status text.
+- **`get_license_history`** *(paid, beta)* — best-available point-in-time status for a past date.
+- **`subscribe_to_changes` / `unsubscribe`** *(paid, coming soon)* — register a webhook for change events; delivery is rolling out.
 
 ## Resources
 
-Read-only context your agent can pull without spending a verification call:
+Read-only reference context (no lookup consumed):
 
-| Resource | What |
+| Resource | Contents |
 |---|---|
-| `licensy://states/{code}` | State board metadata: official URL, credential types, known quirks |
-| `licensy://credentials/{type}` | Canonical metadata for MD, DO, PA, APRN, RN, CNP, CRNA, CNS, CNM |
-| `licensy://schema/license` | JSON schema of the canonical license record |
-| `licensy://changelog` | Recent platform events: board outages, refresh failures, schema changes |
-
----
-
-## Tiers
-
-| | Free | Pro | Enterprise |
-|---|---|---|---|
-| Verify status + expiration | ✅ | ✅ | ✅ |
-| Multi-state license list | ✅ | ✅ | ✅ |
-| License number, dates, board source | | ✅ | ✅ |
-| Signed source screenshots | | ✅ | ✅ |
-| Bulk verify | | 100/call | 1,000/call |
-| Disciplinary + history + webhooks | | ✅ | ✅ |
-| Rate limit | 100/day | 10,000/day | unlimited |
-
-Tiers are enforced server-side. A free-tier call to a paid tool returns a structured `tier_upgrade_required` response (with an upgrade link) — never a hard error — so your agent can surface the upgrade naturally. See [pricing](https://licensy.ai/pricing).
+| `licensy://states/{state_code}` | State board metadata: official URL, credential types, known quirks |
+| `licensy://credentials/{credential_type}` | Metadata for supported credential types (MD, DO, PA) |
+| `licensy://schema/license` | JSON schema of the normalized license record |
+| `licensy://changelog` | Recent platform events (board outages, refresh notes, schema changes) |
 
 ---
 
 ## How it works
 
-Licensy maintains live verification pipelines against all 51 U.S. medical-board jurisdictions and normalizes every board's idiosyncratic status vocabulary into one clean schema (`active`, `expired`, `suspended`, `revoked`, …). The MCP server is a thin, audited layer over that platform — it never invents data, and when a board is briefly unreachable it returns a retryable `service_unavailable`, never a false "not licensed."
-
----
+Licensy maintains data pipelines against U.S. medical-board sources, normalizes each board's differing status vocabulary into one schema (`active`, `expired`, `suspended`, `revoked`, …), preserves primary-source screenshots where available, and refreshes monitored records daily. The MCP server is a thin, audited layer over that data platform — when a source is briefly unreachable it returns a retryable `service_unavailable`, never a false "not licensed."
 
 ## Links
 
 - **Endpoint:** `https://mcp.licensy.ai/mcp`
 - **Discovery card:** `https://mcp.licensy.ai/.well-known/mcp-server`
-- **Docs:** https://licensy.ai/mcp
-- **Support:** support@licensy.ai
+- **Documentation:** https://licensy.ai/mcp
+- **Contact:** support@licensy.ai
 
-*Licensy is a data platform for provider licensing. Verification data is sourced from public state-board records; see [terms](https://licensy.ai/terms).*
+---
+
+*Licensy AI provides licensing information derived from official public sources. Availability, completeness, and update timing may vary by jurisdiction and source. Licensy does not replace credentialing, primary-source verification requirements, legal review, or an organization's own decision-making; customers remain responsible for how the information is used in their workflows.*
